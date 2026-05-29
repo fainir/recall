@@ -1,0 +1,24 @@
+{
+  "name": "@cosfounder/recall",
+  "version": "0.1.0",
+  "description": "A tiny memory layer for LLM agents. Markdown files, kebab-case slugs, wiki-links.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "files": ["src", "README.md", "LICENSE"],
+  "keywords": ["llm", "agent", "memory", "claude", "openai", "rag", "ai"],
+  "author": "Cosfounder Labs, Inc.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fainir/recall"
+  },
+  "homepage": "https://cosfounder.com",
+  "bugs": "https://github.com/fainir/recall/issues",
+  "engines": { "node": ">=18" }
+}
