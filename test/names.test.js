@@ -7,7 +7,7 @@ import { fresh } from './helpers.js';
 
 const UNSAFE = [
   '../evil', '../../etc/passwd', 'a/b', 'a\\b', '.hidden', 'x.md', '',
-  'a'.repeat(65), 'voice\n', 'a\0b', 'Voice', 'has space', '-leading',
+  'a'.repeat(129), '_leading', 'voice\n', 'a\0b', 'Voice', 'has space', '-leading',
   'café', '日本語',
 ];
 
@@ -39,11 +39,13 @@ test('non-string names are rejected instead of becoming "undefined.md"', async (
   assert.deepEqual(await fs.readdir(dir), []);
 });
 
-test('64-char names are accepted', async () => {
+test('128-char names and underscores are accepted', async () => {
   const { r } = await fresh();
-  const name = 'a'.repeat(64);
+  const name = 'a'.repeat(128);
   await r.write({ name, type: 'user', body: 'long' });
   assert.equal((await r.get(name)).body, 'long');
+  await r.write({ name: 'feedback_testing', type: 'feedback', body: 'snake' });
+  assert.equal((await r.get('feedback_testing')).body, 'snake');
 });
 
 test('unicode content round-trips (names stay ASCII slugs)', async () => {
