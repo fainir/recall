@@ -1,17 +1,33 @@
 {
   "name": "@cosfounder/recall",
-  "version": "0.1.0",
-  "description": "A tiny memory layer for LLM agents: Markdown files, kebab-case slugs, [[wiki-links]], explicit-key recall under a token budget. No vectors.",
+  "version": "0.2.0",
+  "description": "Your Claude Code memory, in every agent: read and write Claude Code auto memory (Markdown + [[wiki-links]]) from code or over MCP. Zero dependencies, no vectors.",
   "type": "module",
   "main": "src/index.js",
+  "bin": {
+    "recall-mcp": "bin/recall-mcp.js"
+  },
   "exports": {
     ".": "./src/index.js"
   },
   "scripts": {
     "test": "node --test test/*.test.js"
   },
-  "files": ["src", "README.md", "LICENSE"],
-  "keywords": ["llm", "agent", "agent-memory", "memory", "markdown", "frontmatter", "wiki-links", "claude", "openai", "rag", "ai"],
+  "files": ["src", "bin", "README.md", "LICENSE"],
+  "keywords": [
+    "claude-code",
+    "auto-memory",
+    "mcp",
+    "mcp-server",
+    "agent-memory",
+    "llm",
+    "agent",
+    "memory",
+    "markdown",
+    "wiki-links",
+    "codex",
+    "cursor"
+  ],
   "author": "Cosfounder Labs, Inc.",
   "license": "MIT",
   "repository": {
@@ -22,5 +38,7 @@
   "bugs": {
     "url": "https://github.com/fainir/recall/issues"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }

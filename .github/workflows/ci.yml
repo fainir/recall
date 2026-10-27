@@ -17,3 +17,4 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm test
       - run: node examples/basic.js
+      - run: node bin/recall-mcp.js --help
