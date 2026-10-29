@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:transparent}body{width:1100px;padding:24px;box-sizing:border-box;font-family:Menlo,"SF Mono",monospace;font-size:15px;line-height:1.55}
+.win{background:#0f172a;border-radius:14px;box-shadow:0 20px 50px -20px rgba(15,23,42,.55);overflow:hidden;border:1px solid #1e293b}
+.bar{height:38px;background:#111c33;display:flex;align-items:center;padding:0 16px;gap:8px;border-bottom:1px solid #1e293b}
+.dot{width:12px;height:12px;border-radius:50%}.title{color:#64748b;font-size:13px;margin-left:12px}
+pre{margin:0;padding:22px 26px 26px;color:#cbd5e1;white-space:pre-wrap;font:inherit}
+.p{color:#f8fafc;font-weight:bold}.g{color:#34d399}.r{color:#f87171}.m{color:#64748b}.y{color:#fbbf24}.h{color:#93c5fd;font-weight:bold}
+</style></head><body><div class="win"><div class="bar"><span class="dot" style="background:#ef4444"></span><span class="dot" style="background:#f59e0b"></span><span class="dot" style="background:#22c55e"></span><span class="title">codex - reading Claude Code&#x27;s memory through recall (real run)</span></div><pre><span class="p">&gt; memory_list</span>
+<span class="m">3 memories in ~/.claude/projects/-Users-you-code-acme-api/memory:</span>
+- feedback_testing (feedback) - run the integration suite before saying a change works
+- reference_ci (reference) - where CI runs and how to rerun a flaky job
+- user_role (user) - backend lead, prefers short answers with the command to run
+
+<span class="p">&gt; memory_recall {&quot;requires&quot;: [&quot;feedback_testing&quot;]}</span>
+<span class="h">## feedback_testing (feedback)</span>
+Run `npm run test:int` (needs the local Postgres from docker compose), not just `npm test`.
+Why: the unit tests mock the database; two &quot;done&quot; changes broke prod queries.
+How to apply: any change under src/db/ or src/queries/. CI details in [[reference_ci]].
+
+<span class="h">## reference_ci (reference)</span>
+CI is GitHub Actions, workflow ci.yml. Rerun a flaky job with `gh run rerun --failed`.
+
+<span class="g">tokens_used: 180   - followed the [[reference_ci]] link on its own</span></pre></div></body></html>
