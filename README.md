@@ -37,6 +37,8 @@ codex mcp add recall -- npx -y @fainir/recall --claude-code /path/to/your/repo -
 }
 ```
 
+**Gemini CLI**: `gemini extensions install https://github.com/fainir/recall` (it serves the memory of the folder you start Gemini in).
+
 **Any other MCP client**: run `npx -y @fainir/recall` with the same arguments as a stdio server. Needs Node.js 18+.
 
 The agent then has these tools. Here is a real run against a repository with three memories Claude Code wrote:

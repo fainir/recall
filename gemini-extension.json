@@ -1,0 +1,11 @@
+{
+  "name": "recall",
+  "version": "0.2.0",
+  "description": "Share Claude Code auto memory with Gemini CLI over MCP.",
+  "mcpServers": {
+    "recall": {
+      "command": "node",
+      "args": ["${extensionPath}/bin/recall-mcp.js", "--claude-code", "${workspacePath}"]
+    }
+  }
+}
