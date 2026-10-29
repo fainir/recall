@@ -20,7 +20,7 @@ Point any MCP client at recall and the project's repository. `--read-only` lets 
 **Codex**
 
 ```bash
-codex mcp add recall -- npx -y github:fainir/recall --claude-code /path/to/your/repo --read-only
+codex mcp add recall -- npx -y @fainir/recall --claude-code /path/to/your/repo --read-only
 ```
 
 **Cursor** (`.cursor/mcp.json` in the project, or `~/.cursor/mcp.json`)
@@ -31,13 +31,13 @@ codex mcp add recall -- npx -y github:fainir/recall --claude-code /path/to/your/
     "recall": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "github:fainir/recall", "--claude-code", "/path/to/your/repo", "--read-only"]
+      "args": ["-y", "@fainir/recall", "--claude-code", "/path/to/your/repo", "--read-only"]
     }
   }
 }
 ```
 
-**Any other MCP client**: run `npx -y github:fainir/recall` with the same arguments as a stdio server. Needs Node.js 18+. The package is not on npm yet, so `npx` installs it from GitHub.
+**Any other MCP client**: run `npx -y @fainir/recall` with the same arguments as a stdio server. Needs Node.js 18+.
 
 The agent then has these tools. Here is a real run against a repository with three memories Claude Code wrote:
 
@@ -76,11 +76,11 @@ tokens_used: 180
 ## Use it from code
 
 ```bash
-npm install github:fainir/recall
+npm install @fainir/recall
 ```
 
 ```js
-import { Recall } from '@cosfounder/recall';
+import { Recall } from '@fainir/recall';
 
 const memory = Recall.forClaudeCode('/Users/you/code/acme-api');
 console.log(memory.dir);
