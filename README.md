@@ -239,3 +239,13 @@ node examples/basic.js   # the library on a plain recall directory
 ## License
 
 [MIT](LICENSE)
+
+---
+
+### More open source by [Nir Feinstein](https://nirfeinste.in)
+
+- [agent-harness](https://github.com/fainir/agent-harness) - make Claude Code or Codex act as a product team, a CEO or a portfolio manager
+- [frugal](https://github.com/fainir/frugal) - your agent finds the cheaper honest way before it pays for anything
+- [flipback](https://github.com/fainir/flipback) - an automatic `/goal` for every turn: sends Claude Code back when it stops early
+- [most-capable-agent-system-prompt](https://github.com/fainir/most-capable-agent-system-prompt) - the copy-paste prompt for a self-improving agent system
+- [All projects](https://nirfeinste.in/#open-source)
