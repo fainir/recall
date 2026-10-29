@@ -9,6 +9,10 @@ Claude Code now remembers things on its own: your corrections, how you like to w
 
 recall makes that memory portable. It finds the same directory Claude Code uses (same rules, down to its folder-naming hash), reads every file Claude Code writes, and writes files Claude Code reads back.
 
+<p align="center">
+  <img src="assets/demo.png" width="860" alt="Codex calling recall: memory_list shows three memories Claude Code wrote, then memory_recall returns feedback_testing and follows its [[reference_ci]] link on its own, in 180 tokens.">
+</p>
+
 ## Quick start: share it over MCP
 
 Point any MCP client at recall and the project's repository. `--read-only` lets the other agent read what Claude Code remembers without changing it; leave it off to let both write.
