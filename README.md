@@ -2,6 +2,9 @@
 
 [![CI](https://github.com/fainir/recall/actions/workflows/ci.yml/badge.svg)](https://github.com/fainir/recall/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@fainir/recall)](https://www.npmjs.com/package/@fainir/recall)
+[![fainir/recall MCP server](https://glama.ai/mcp/servers/fainir/recall/badges/score.svg)](https://glama.ai/mcp/servers/fainir/recall)
+[![Mentioned in Awesome MCP Servers](https://awesome.re/mentioned-badge.svg)](https://github.com/TensorBlock/awesome-mcp-servers)
 
 **Your Claude Code memory, in every agent.** recall reads and writes the memory Claude Code keeps for each project, so Codex, Cursor or an agent you build yourself can use the same memories, over MCP or from code. Zero dependencies, no vectors, no database: the memories stay plain Markdown files.
 
