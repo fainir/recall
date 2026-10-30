@@ -1,7 +1,7 @@
 {
   "name": "@fainir/recall",
   "mcpName": "io.github.fainir/recall",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Your Claude Code memory, in every agent: read and write Claude Code auto memory (Markdown + [[wiki-links]]) from code or over MCP. Zero dependencies, no vectors.",
   "type": "module",
   "main": "src/index.js",

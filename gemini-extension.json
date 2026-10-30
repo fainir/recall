@@ -1,6 +1,6 @@
 {
   "name": "recall",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Share Claude Code auto memory with Gemini CLI over MCP.",
   "mcpServers": {
     "recall": {
