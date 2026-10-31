@@ -7,6 +7,8 @@
 //   recall-mcp --dir <dir>              a plain recall directory (add --format claude-code to
 //                                       write Claude Code's file format there)
 //   --read-only                         list/get/recall/due only; no write or delete tools
+//   --allow-secrets                     return memories as stored (by default, keys, tokens and passwords
+//                                       in them are replaced with [redacted] before another agent sees them)
 //
 // Zero dependencies: MCP over stdio is newline-delimited JSON-RPC 2.0.
 
@@ -18,13 +20,15 @@ import { Recall } from '../src/index.js';
 const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
-const USAGE = `Usage: recall-mcp [--claude-code [project]] [--dir <dir> [--format recall|claude-code]] [--read-only]
+const USAGE = `Usage: recall-mcp [--claude-code [project]] [--dir <dir> [--format recall|claude-code]] [--read-only] [--allow-secrets]
 
 Serves memories as MCP tools over stdio. With no options it serves the auto memory Claude Code
-keeps for the project in the current directory. RECALL_DIR and RECALL_READ_ONLY=1 work too.`;
+keeps for the project in the current directory. Keys, tokens and passwords found in memories are
+replaced with [redacted] unless --allow-secrets is given. RECALL_DIR, RECALL_READ_ONLY=1 and
+RECALL_ALLOW_SECRETS=1 work too.`;
 
 export function parseArgs(argv, env = process.env) {
-  const opts = { mode: null, project: null, dir: null, format: null, readOnly: env.RECALL_READ_ONLY === '1' };
+  const opts = { mode: null, project: null, dir: null, format: null, readOnly: env.RECALL_READ_ONLY === '1', allowSecrets: env.RECALL_ALLOW_SECRETS === '1' };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const value = () => {
@@ -41,6 +45,7 @@ export function parseArgs(argv, env = process.env) {
       opts.dir = value();
     } else if (a === '--format') opts.format = value();
     else if (a === '--read-only') opts.readOnly = true;
+    else if (a === '--allow-secrets') opts.allowSecrets = true;
     else if (a === '-h' || a === '--help') opts.help = true;
     else throw new Error(`unknown option ${a}`);
   }
@@ -143,6 +148,34 @@ const WRITE_TOOLS = new Set(['memory_write', 'memory_delete']);
 
 const describe = m => `${m.name} (${m.type ?? 'untyped'})${m.description ? ` - ${m.description}` : ''}`;
 
+// Claude Code memories sometimes capture a credential from a debugging session ("remember how we fixed
+// the staging connection"). Served to another agent, that text goes to another model provider, so
+// recognisable secrets are replaced before it leaves. Patterns are specific on purpose: a false
+// positive hides a useful fact, a vague pattern would hide many.
+const SECRET_PATTERNS = [
+  /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g,
+  /\bsk-ant-[A-Za-z0-9_-]{16,}/g, // Anthropic
+  /\bsk-(?:proj-|svcacct-|admin-)?[A-Za-z0-9_-]{32,}/g, // OpenAI
+  /\bgh[pousr]_[A-Za-z0-9]{30,}\b/g, /\bgithub_pat_[A-Za-z0-9_]{30,}/g, // GitHub
+  /\bxox[abprs]-[A-Za-z0-9-]{10,}/g, // Slack
+  /\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/g, // AWS access key id
+  /\bAIza[0-9A-Za-z_-]{35}\b/g, // Google API key
+  /\b[rs]k_(?:live|test)_[A-Za-z0-9]{16,}/g, // Stripe
+  /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g, // JWT
+];
+const URL_PASSWORD = /\b([a-z][a-z0-9+.-]*:\/\/[^\s:@\/]+:)([^\s@\/]+)@/gi; // keep scheme and user, hide the password
+const BEARER = /\b(Bearer\s+)[A-Za-z0-9._~+\/=-]{16,}/g;
+
+/** Replaces recognisable secrets with [redacted]; returns the text and how many were replaced. */
+export function redactSecrets(text) {
+  let count = 0;
+  const hit = () => { count++; return '[redacted]'; };
+  let out = text.replace(URL_PASSWORD, (_, keep) => { count++; return `${keep}[redacted]@`; });
+  out = out.replace(BEARER, (_, keep) => { count++; return `${keep}[redacted]`; });
+  for (const re of SECRET_PATTERNS) out = out.replace(re, hit);
+  return { text: out, count };
+}
+
 async function callTool(store, name, args) {
   switch (name) {
     case 'memory_list': {
@@ -180,7 +213,7 @@ async function callTool(store, name, args) {
 }
 
 /** Handles one JSON-RPC message. Resolves the response object, or null for notifications. */
-export async function handle(msg, { store, readOnly }) {
+export async function handle(msg, { store, readOnly, allowSecrets = false }) {
   const isRequest = msg && typeof msg === 'object' && !Array.isArray(msg) && 'id' in msg;
   const reply = result => (isRequest ? { jsonrpc: '2.0', id: msg.id, result } : null);
   const fail = (code, message) => (isRequest ? { jsonrpc: '2.0', id: msg.id, error: { code, message } } : null);
@@ -214,7 +247,11 @@ export async function handle(msg, { store, readOnly }) {
       }
       try {
         const out = await callTool(store, name, args);
-        const text = typeof out === 'string' ? out : out.error;
+        let text = typeof out === 'string' ? out : out.error;
+        if (!allowSecrets && !WRITE_TOOLS.has(name)) {
+          const r = redactSecrets(text);
+          if (r.count) text = `${r.text}\n\n(${r.count} secret${r.count === 1 ? '' : 's'} redacted; start recall-mcp with --allow-secrets to return them as stored)`;
+        }
         return reply({ content: [{ type: 'text', text }], isError: typeof out !== 'string' });
       } catch (e) {
         return reply({ content: [{ type: 'text', text: e.message }], isError: true });
@@ -254,7 +291,7 @@ async function main() {
       } catch {
         return send({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } });
       }
-      send(await handle(msg, { store, readOnly: opts.readOnly }));
+      send(await handle(msg, { store, readOnly: opts.readOnly, allowSecrets: opts.allowSecrets }));
     });
   });
   rl.on('close', () => { queue.then(() => process.exit(0)); });
