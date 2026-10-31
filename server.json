@@ -8,12 +8,12 @@
     "source": "github"
   },
   "websiteUrl": "https://github.com/fainir/recall#readme",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@fainir/recall",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "transport": {
         "type": "stdio"
       },

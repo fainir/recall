@@ -84,10 +84,10 @@ test('read-only mode hides and refuses the write tools', async () => {
 });
 
 test('parseArgs and openStore', async () => {
-  assert.deepEqual(parseArgs([], {}), { mode: null, project: null, dir: null, format: null, readOnly: false });
+  assert.deepEqual(parseArgs([], {}), { mode: null, project: null, dir: null, format: null, readOnly: false, allowSecrets: false });
   assert.equal(parseArgs(['--claude-code', '/repo', '--read-only'], {}).project, '/repo');
   assert.equal(parseArgs(['--claude-code', '--read-only'], {}).project, null);
-  assert.deepEqual(parseArgs([], { RECALL_DIR: '/m', RECALL_READ_ONLY: '1' }), { mode: 'dir', project: null, dir: '/m', format: null, readOnly: true });
+  assert.deepEqual(parseArgs([], { RECALL_DIR: '/m', RECALL_READ_ONLY: '1' }), { mode: 'dir', project: null, dir: '/m', format: null, readOnly: true, allowSecrets: false });
   assert.throws(() => parseArgs(['--dir'], {}), /--dir needs a value/);
   assert.throws(() => parseArgs(['--format', 'claude-code'], {}), /only applies with --dir/);
   assert.throws(() => parseArgs(['--bogus'], {}), /unknown option/);

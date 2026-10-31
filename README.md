@@ -76,7 +76,7 @@ tokens_used: 180
 | `memory_write` | Save or replace a memory in Claude Code's format, and add it to the `MEMORY.md` index. Not offered with `--read-only`. |
 | `memory_delete` | Delete a memory and its index line. Not offered with `--read-only`. |
 
-`recall-mcp` options: `--claude-code [repo]` (the default, using the current directory), `--dir <dir>` for any other memory directory (add `--format claude-code` to write Claude Code's file format there), and `--read-only`. `RECALL_DIR` and `RECALL_READ_ONLY=1` work as environment variables.
+`recall-mcp` options: `--claude-code [repo]` (the default, using the current directory), `--dir <dir>` for any other memory directory (add `--format claude-code` to write Claude Code's file format there), `--read-only`, and `--allow-secrets`. `RECALL_DIR`, `RECALL_READ_ONLY=1` and `RECALL_ALLOW_SECRETS=1` work as environment variables.
 
 ## Use it from code
 
@@ -229,6 +229,7 @@ For an agent that knows what it needs, explicit keys beat similarity search: ask
 ## Limitations
 
 - **Privacy:** serving Claude Code's memory to another agent sends those memories to that agent's model provider. Use `--read-only` and point it only at projects you are happy to share.
+- **Secrets:** a memory can capture a credential from a debugging session. Before a memory leaves the server, recall replaces recognisable secrets with `[redacted]`: passwords in connection URLs, bearer tokens, private key blocks, and Anthropic, OpenAI, GitHub, Slack, AWS, Google and Stripe keys, plus JWTs, and says how many it hid. The files on disk are not changed. `--allow-secrets` turns this off. It is a safety net for known formats, not a guarantee: keep secrets out of memories.
 - Claude Code reads `MEMORY.md` at the start of a session, so a memory another agent writes shows up in Claude Code's next session, not the current one. Claude Code loads only the first 200 lines (or 25 KB) of that index.
 - Writes are atomic (temp file + rename), but the last writer wins. There is no locking between recall and a running Claude Code session.
 - Auto memory is per machine. recall does not sync it anywhere.
