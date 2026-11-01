@@ -40,6 +40,8 @@ codex mcp add recall -- npx -y @fainir/recall --claude-code /path/to/your/repo -
 }
 ```
 
+**Cline**: in the MCP Servers panel choose Configure, and add the same `recall` entry as for Cursor to `cline_mcp_settings.json`. Or ask Cline to "set up the MCP server from https://github.com/fainir/recall": in a test on 2026-11-01 it read this README, added the entry, started the server and listed its tools.
+
 **Gemini CLI**: `gemini extensions install https://github.com/fainir/recall` (it serves the memory of the folder you start Gemini in).
 
 **Any other MCP client**: run `npx -y @fainir/recall` with the same arguments as a stdio server. Needs Node.js 18+.
