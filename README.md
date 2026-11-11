@@ -18,6 +18,30 @@ recall makes that memory portable. It finds the same directory Claude Code uses 
 
 ## Quick start: share it over MCP
 
+### Try it with sample notes
+
+Run this in Bash or Zsh with Node.js 18 or newer. It creates two temporary notes, asks the read-only MCP server to recall the `review` note named in `requires`, and follows its link to `checks`.
+
+```sh
+(
+  sample_dir=$(mktemp -d "${TMPDIR:-/tmp}/recall-demo.XXXXXX") || exit
+  trap 'rm "$sample_dir/review.md" "$sample_dir/checks.md"; rmdir "$sample_dir"' EXIT
+
+  printf '%s\n' 'Before merging, follow [[checks]].' > "$sample_dir/review.md"
+  printf '%s\n' 'Run the focused test before merging.' > "$sample_dir/checks.md"
+
+  printf '%s\n' \
+    '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"recall-demo","version":"1"}}}' \
+    '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+    '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"memory_recall","arguments":{"requires":["review"]}}}' |
+    npx -y @fainir/recall@0.3.0 --dir "$sample_dir" --read-only
+)
+```
+
+In the last JSON response, `result.content[0].text` contains both `Before merging, follow [[checks]].` and `Run the focused test before merging.` The second line comes from the linked note. Use the setup below to connect your own project.
+
+### Connect your project
+
 Point any MCP client at recall and the project's repository. `--read-only` lets the other agent read what Claude Code remembers without changing it; leave it off to let both write.
 
 **Codex**
