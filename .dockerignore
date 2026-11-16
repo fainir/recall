@@ -1,0 +1,8 @@
+**
+!Dockerfile
+!LICENSE
+!package.json
+!bin/
+!bin/recall-mcp.js
+!src/
+!src/**
