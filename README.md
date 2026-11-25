@@ -34,7 +34,7 @@ Run this in Bash or Zsh with Node.js 18 or newer. It creates two temporary notes
     '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"recall-demo","version":"1"}}}' \
     '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
     '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"memory_recall","arguments":{"requires":["review"]}}}' |
-    npx -y @fainir/recall@0.3.0 --dir "$sample_dir" --read-only
+    npx -y @fainir/recall --dir "$sample_dir" --read-only
 )
 ```
 
