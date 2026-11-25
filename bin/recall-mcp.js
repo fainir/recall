@@ -152,8 +152,8 @@ const describe = m => `${m.name} (${m.type ?? 'untyped'})${m.description ? ` - $
 // the staging connection"). Served to another agent, that text goes to another model provider, so
 // recognisable secrets are replaced before it leaves. Patterns are specific on purpose: a false
 // positive hides a useful fact, a vague pattern would hide many.
+const PRIVATE_KEY_BLOCK = /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g;
 const SECRET_PATTERNS = [
-  /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g,
   /\bsk-ant-[A-Za-z0-9_-]{16,}/g, // Anthropic
   /\bsk-(?:proj-|svcacct-|admin-)?[A-Za-z0-9_-]{32,}/g, // OpenAI
   /\bgh[pousr]_[A-Za-z0-9]{30,}\b/g, /\bgithub_pat_[A-Za-z0-9_]{30,}/g, // GitHub
@@ -165,12 +165,41 @@ const SECRET_PATTERNS = [
 ];
 const URL_PASSWORD = /\b([a-z][a-z0-9+.-]*:\/\/[^\s:@\/]+:)([^\s@\/]+)@/gi; // keep scheme and user, hide the password
 const BEARER = /\b(Bearer\s+)[A-Za-z0-9._~+\/=-]{16,}/g;
+const INLINE_CODE = /(?<!\x60)(\x60+)(?!\x60)([^\r\n]*?)(?<!\x60)\1(?!\x60)/g;
+const ENV_ASSIGNMENT_START = String.raw`[A-Z_][A-Z0-9_]*[ \t]*=`;
+const ENV_ESCAPE = String.raw`\\(?:\r?\n|[^\r\n])`;
+// A truncated quote must not consume the next setting or code fence.
+const ENV_VALUE_CONTINUATION = String.raw`\r?\n(?![ \t]*(?:(?:export[ \t]+)?${ENV_ASSIGNMENT_START}|\x60{3}|~{3}))`;
+const ENV_SECRET = new RegExp(
+  String.raw`\b((?:[A-Z0-9_]*_)?(?:PASSWORD|PASSWD|PASSPHRASE|TOKEN|SECRET|API_KEY|PRIVATE_KEY|SECRET_ACCESS_KEY)[ \t]*=` +
+  String.raw`(?:[ \t]+(?![ \t]|#|${ENV_ASSIGNMENT_START}))?)` +
+  '(?:' +
+  String.raw`"(?:[^"\\\r\n]|${ENV_ESCAPE}|${ENV_VALUE_CONTINUATION})*"|'(?:[^'\r\n]|${ENV_VALUE_CONTINUATION})*'|` +
+  String.raw`"(?:[^"\\\r\n\x60]|${ENV_ESCAPE})*(?=\x60|$)|'[^'\r\n\x60]*(?=\x60|$)|` +
+  String.raw`${ENV_ESCAPE}|[^\s\\"'\x60;&|()<>]` +
+  ')+',
+  'gm',
+);
 
 /** Replaces recognisable secrets with [redacted]; returns the text and how many were replaced. */
 export function redactSecrets(text) {
   let count = 0;
   const hit = () => { count++; return '[redacted]'; };
-  let out = text.replace(URL_PASSWORD, (_, keep) => { count++; return `${keep}[redacted]@`; });
+  // Mask complete key blocks first, even when placed inside a multi-line assignment.
+  let out = text.replace(PRIVATE_KEY_BLOCK, hit);
+  const redactAssignments = source => source.replace(ENV_SECRET, (assignment, keep, offset) => {
+    const value = assignment.slice(keep.length);
+    const closingBold = offset >= 2 && source.slice(offset - 2, offset) === '**' && value.endsWith('**') ? '**' : '';
+    const closingLink = source[offset - 1] === '[' && value.endsWith(']') && source[offset + assignment.length] === '(' ? ']' : '';
+    const suffix = closingBold || closingLink;
+    const plainValue = suffix ? value.slice(0, -suffix.length) : value;
+    if (/^(?:\[redacted\]|(['"])(?:\s*\[redacted\]\s*)?\1)$/.test(plainValue)) return assignment;
+    return keep + hit() + suffix;
+  });
+  // Resolve separate Markdown examples before looking for quoted values in the surrounding note.
+  out = out.replace(INLINE_CODE, (_, ticks, code) => ticks + redactAssignments(code) + ticks);
+  out = redactAssignments(out);
+  out = out.replace(URL_PASSWORD, (_, keep) => { count++; return `${keep}[redacted]@`; });
   out = out.replace(BEARER, (_, keep) => { count++; return `${keep}[redacted]`; });
   for (const re of SECRET_PATTERNS) out = out.replace(re, hit);
   return { text: out, count };
