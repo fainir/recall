@@ -40,6 +40,15 @@ Run this in Bash or Zsh with Node.js 18 or newer. It creates two temporary notes
 
 In the last JSON response, `result.content[0].text` contains both `Before merging, follow [[checks]].` and `Run the focused test before merging.` The second line comes from the linked note. Use the setup below to connect your own project.
 
+### Run from source
+
+The current GitHub source also masks common named environment values, such as `DB_PASSWORD` and `SERVICE_TOKEN`, in MCP read results. npm version 0.3.0 ships the earlier masking rules. To run the current source:
+
+```bash
+git clone https://github.com/fainir/recall.git
+node recall/bin/recall-mcp.js --claude-code /path/to/your/repo --read-only
+```
+
 ### Connect your project
 
 Point any MCP client at recall and the project's repository. `--read-only` lets the other agent read what Claude Code remembers without changing it; leave it off to let both write.
