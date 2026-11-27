@@ -18,6 +18,18 @@ recall makes that memory portable. It finds the same directory Claude Code uses 
 
 ## Quick start: share it over MCP
 
+### Use the 0.3.1 GitHub preview
+
+The [Recall 0.3.1 GitHub preview](https://github.com/fainir/recall/releases/tag/v0.3.1) masks common named environment credentials in MCP read results. With Node.js 18 or later, configure your MCP client to launch this command. Replace `/path/to/memory` with the folder of Markdown notes you want it to read.
+
+```sh
+npm exec --yes \
+  --package=https://github.com/fainir/recall/releases/download/v0.3.1/fainir-recall-0.3.1.tgz \
+  -- recall-mcp --dir "/path/to/memory" --read-only
+```
+
+For Claude Code project memory, use `--claude-code "/path/to/your/repo"` in place of `--dir "/path/to/memory"`.
+
 ### Try it with sample notes
 
 Run this in Bash or Zsh with Node.js 18 or newer. It creates two temporary notes, asks the read-only MCP server to recall the `review` note named in `requires`, and follows its link to `checks`.
